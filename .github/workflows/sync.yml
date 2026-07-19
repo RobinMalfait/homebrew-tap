@@ -4,8 +4,6 @@ name: Sync formulas
 # GitHub release, and this workflow copies it into the tap. Pushing to our own repo only needs
 # the default GITHUB_TOKEN, so no cross-repo credentials exist anywhere.
 on:
-  schedule:
-    - cron: "17 * * * *"
   workflow_dispatch:
 
 permissions:
