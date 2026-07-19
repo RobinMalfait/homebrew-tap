@@ -1,0 +1,34 @@
+name: Sync formulas
+
+# Pull-based publishing: the taco release workflow attaches the generated formula to every
+# GitHub release, and this workflow copies it into the tap. Pushing to our own repo only needs
+# the default GITHUB_TOKEN, so no cross-repo credentials exist anywhere.
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download the formula of the latest taco release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p Formula
+          if ! gh release download --repo RobinMalfait/taco --pattern 'taco.rb' --output Formula/taco.rb --clobber; then
+            echo "No release with a formula yet, nothing to sync"
+          fi
+
+      - name: Commit when the formula changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A Formula
+          git diff --cached --quiet || (git commit -m "Sync formulas" && git push)
